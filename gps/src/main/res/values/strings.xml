@@ -1,3 +1,9 @@
 <resources>
+
     <string name="app_name">Gps</string>
+
+    <string name="unknown">نامشخص</string>
+    <string name="kilometer">کیلومتر</string>
+    <string name="meter">متر</string>
+
 </resources>

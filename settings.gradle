@@ -1,0 +1,2 @@
+include ':app', ':gps'
+rootProject.name='BPC_DIS_Gps'

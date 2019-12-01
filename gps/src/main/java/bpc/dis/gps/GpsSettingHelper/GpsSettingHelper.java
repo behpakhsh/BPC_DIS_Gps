@@ -1,4 +1,4 @@
-package bpc.dis.gps.GpsSettingUtils;
+package bpc.dis.gps.GpsSettingHelper;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,7 +19,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class GpsSettingUtilities {
+public class GpsSettingHelper {
 
     private Context context;
     private SettingsClient mSettingsClient;
@@ -27,7 +27,7 @@ public class GpsSettingUtilities {
     private LocationManager locationManager;
     private int reqCode;
 
-    public GpsSettingUtilities(Context context, int reqCode) {
+    public GpsSettingHelper(Context context, int reqCode) {
         this.context = context;
         this.reqCode = reqCode;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);

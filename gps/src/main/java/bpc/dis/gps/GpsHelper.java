@@ -1,6 +1,7 @@
 package bpc.dis.gps;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.provider.Settings;
@@ -18,6 +19,12 @@ public class GpsHelper {
         unknown = activity.getResources().getString(R.string.unknown);
         kilometer = activity.getResources().getString(R.string.kilometer);
         meter = activity.getResources().getString(R.string.meter);
+    }
+
+    public GpsHelper(Context context) {
+        unknown = context.getResources().getString(R.string.unknown);
+        kilometer = context.getResources().getString(R.string.kilometer);
+        meter = context.getResources().getString(R.string.meter);
     }
 
     public GpsHelper(String unknown, String kilometer, String meter) {
@@ -38,7 +45,7 @@ public class GpsHelper {
         return locationProviders != null && !locationProviders.equals("");
     }
 
-    public String getDistanceBetweenLocation(Location source, Location destination) {
+    public String getDistanceBetweenLocationWithUnit(Location source, Location destination) {
         if (source == null || destination == null) {
             return unknown;
         }
@@ -53,6 +60,17 @@ public class GpsHelper {
         } else {
             return ((int) distance) + " " + meter;
         }
+    }
+
+    public float getDistanceBetweenLocation(Location source, Location destination) {
+        if (source == null || destination == null) {
+            return 0;
+        }
+
+        if ((source.getLatitude() == 0 && source.getLongitude() == 0) || (destination.getLatitude() == 0 && destination.getLongitude() == 0)) {
+            return 0;
+        }
+        return source.distanceTo(destination);
     }
 
 }

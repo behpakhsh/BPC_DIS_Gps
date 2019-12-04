@@ -55,11 +55,7 @@ public class GpsHelper {
         }
 
         float distance = source.distanceTo(destination);
-        if (distance > 1000) {
-            return ((int) distance / 1000) + " " + kilometer;
-        } else {
-            return ((int) distance) + " " + meter;
-        }
+        return getDistanceByTitle(distance);
     }
 
     public float getDistanceBetweenLocation(Location source, Location destination) {
@@ -71,6 +67,15 @@ public class GpsHelper {
             return 0;
         }
         return source.distanceTo(destination);
+    }
+
+    public String getDistanceByTitle(float distance){
+        if (distance > 1000) {
+            return ((int) distance / 1000) + " " + kilometer;
+        } else {
+            return ((int) distance) + " " + meter;
+        }
+
     }
 
 }

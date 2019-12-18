@@ -69,13 +69,12 @@ public class GpsHelper {
         return source.distanceTo(destination);
     }
 
-    public String getDistanceByTitle(float distance){
+    public String getDistanceByTitle(float distance) {
         if (distance > 1000) {
             return ((int) distance / 1000) + " " + kilometer;
         } else {
             return ((int) distance) + " " + meter;
         }
-
     }
 
 }

@@ -1,8 +1,10 @@
 package bpc.dis.gps.RoutingNavigationHelper;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 
 import java.util.Locale;
@@ -39,6 +41,11 @@ public class RoutingNavigationHelper {
             intent.setPackage("com.google.android.apps.maps");
             context.startActivity(intent);
         }
+    }
+
+    public void startGeoNavigation(Activity activity, Location source, Location destination) {
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude()));
+        activity.startActivity(intent);
     }
 
 }

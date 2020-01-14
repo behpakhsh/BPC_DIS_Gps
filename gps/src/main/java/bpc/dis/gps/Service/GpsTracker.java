@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -96,8 +97,13 @@ public class GpsTracker extends Service implements android.location.LocationList
         if (MockLocationChecker.thereIsAnyMockLocationApp(activity)) {
             if (MockLocationChecker.isMockSettingsOn(activity)) {
                 gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                if (location.isFromMockProvider()) {
+                    gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
+                }
             }
         }
+
 
     }
 

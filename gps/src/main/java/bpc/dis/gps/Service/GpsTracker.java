@@ -93,8 +93,8 @@ public class GpsTracker extends Service implements android.location.LocationList
             gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
         }
 
-        if (MockLocationChecker.isMockSettingsOn(activity)) {
-            if (MockLocationChecker.thereIsAnyMockLocationApp(activity)) {
+        if (MockLocationChecker.thereIsAnyMockLocationApp(activity)) {
+            if (MockLocationChecker.isMockSettingsOn(activity)) {
                 gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
             }
         }

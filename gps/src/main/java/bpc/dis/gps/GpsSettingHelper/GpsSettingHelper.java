@@ -24,42 +24,28 @@ import bpc.dis.gps.Service.GpsTracker;
 
 public class GpsSettingHelper {
 
-    private Context context;
-    private SettingsClient mSettingsClient;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationManager locationManager;
-    private int reqCode;
-
-    public GpsSettingHelper(Context context, int reqCode) {
-        this.context = context;
-        this.reqCode = reqCode;
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        mSettingsClient = LocationServices.getSettingsClient(context);
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(10 * 1000);
-        locationRequest.setFastestInterval(2 * 1000);
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-        mLocationSettingsRequest = builder.build();
-        builder.setAlwaysShow(true);
-    }
-
-    public void turnGPSOn(GpsSettingHelperListener GpsSettingHelperListener) {
+    public void turnOnGps(Context context, int reqCode, GpsSettingHelperListener gpsSettingHelperListener) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            return;
+        }
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (new GpsTracker(context).getGpsTrackerStatus() == GpsTrackerStatus.IS_FAKE_LOCATION) {
-                openSetting(GpsSettingHelperListener);
+                openSetting(context, reqCode, gpsSettingHelperListener);
             } else {
-                if (GpsSettingHelperListener != null) {
-                    GpsSettingHelperListener.gpsStatus(true);
+                if (gpsSettingHelperListener != null) {
+                    gpsSettingHelperListener.gpsStatus(true);
                 }
             }
         } else {
-            openSetting(GpsSettingHelperListener);
+            openSetting(context, reqCode, gpsSettingHelperListener);
         }
     }
 
-    private void openSetting(final GpsSettingHelperListener GpsSettingHelperListener) {
-        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+    public void openSetting(final Context context, final int reqCode, final GpsSettingHelperListener GpsSettingHelperListener) {
+        LocationSettingsRequest locationSettingsRequest = getLocationSettingsRequest();
+        SettingsClient settingsClient = LocationServices.getSettingsClient(context);
+        settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener((Activity) context, new OnSuccessListener<LocationSettingsResponse>() {
                     @Override
                     public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
@@ -75,8 +61,8 @@ public class GpsSettingHelper {
                         switch (statusCode) {
                             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                                 try {
-                                    ResolvableApiException rae = (ResolvableApiException) e;
-                                    rae.startResolutionForResult((Activity) context, reqCode);
+                                    ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                                    resolvableApiException.startResolutionForResult((Activity) context, reqCode);
                                 } catch (IntentSender.SendIntentException ee) {
                                     ee.printStackTrace();
                                 }
@@ -89,10 +75,14 @@ public class GpsSettingHelper {
                 });
     }
 
-    public interface GpsSettingHelperListener {
-
-        void gpsStatus(boolean isGPSEnable);
-
+    private LocationSettingsRequest getLocationSettingsRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10 * 1000);
+        locationRequest.setFastestInterval(2 * 1000);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true);
+        return builder.build();
     }
 
 }

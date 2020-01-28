@@ -1,6 +1,5 @@
 package bpc.dis.gps.RoutingNavigationHelper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,26 +10,18 @@ import java.util.Locale;
 
 public class RoutingNavigationHelper {
 
-    private Context context;
-    private PackageManager packageManager;
-
-    public RoutingNavigationHelper(Context context) {
-        this.packageManager = context.getPackageManager();
-        this.context = context;
-    }
-
-    private boolean isWazeInstalled() {
+    private boolean isWazeInstalled(Context context) {
         boolean isInstalled = true;
         try {
-            packageManager.getPackageInfo("com.waze", 0);
+            context.getPackageManager().getPackageInfo("com.waze", 0);
         } catch (PackageManager.NameNotFoundException e) {
             isInstalled = false;
         }
         return isInstalled;
     }
 
-    public void startNavigation(double lat, double lng) {
-        if (isWazeInstalled()) {
+    public void startNavigation(Context context, double lat, double lng) {
+        if (isWazeInstalled(context)) {
             String url = "https://waze.com/ul?q=" + lat + "," + lng + "&navigate=yes&zoom=17";
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.setPackage("com.waze");
@@ -43,9 +34,10 @@ public class RoutingNavigationHelper {
         }
     }
 
-    public void startGeoNavigation(Activity activity, Location source, Location destination) {
-        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude()));
-        activity.startActivity(intent);
+    public void startGeoNavigation(Context context, Location source, Location destination) {
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude()));
+        context.startActivity(intent);
     }
 
 }

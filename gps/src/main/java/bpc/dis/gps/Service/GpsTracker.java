@@ -19,16 +19,14 @@ import bpc.dis.gps.MockLocationChecker;
 public class GpsTracker extends Service implements android.location.LocationListener {
 
     private GpsTrackerStatus gpsTrackerStatus;
-    private Context activity;
     private Location location;
 
     public GpsTracker() {
 
     }
 
-    public GpsTracker(Context activity) {
-        this.activity = activity;
-        initLocation();
+    public GpsTracker(Context context) {
+        initLocation(context);
     }
 
     @Override
@@ -56,15 +54,15 @@ public class GpsTracker extends Service implements android.location.LocationList
         return null;
     }
 
-    public void initLocation() {
+    public void initLocation(Context context) {
 
-        LocationManager locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         if (locationManager == null) {
             gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
             return;
         }
 
-        if ((ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             gpsTrackerStatus = GpsTrackerStatus.ACCESSS_DENY;
             location = new Location("");
             return;
@@ -92,8 +90,8 @@ public class GpsTracker extends Service implements android.location.LocationList
 
         if (location == null) {
             gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
-        } else if (MockLocationChecker.thereIsAnyMockLocationApp(activity)) {
-            if (MockLocationChecker.isMockSettingsOn(activity)) {
+        } else if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
+            if (MockLocationChecker.isMockSettingsOn(context)) {
                 gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 if (location.isFromMockProvider()) {

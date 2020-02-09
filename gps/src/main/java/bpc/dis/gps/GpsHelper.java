@@ -8,9 +8,6 @@ import android.provider.Settings;
 
 public class GpsHelper {
 
-    private static final String packageName = "com.android.settings";
-    private static final String className = "com.android.settings.widget.SettingsAppWidgetProvider";
-
     private String unknown;
     private String kilometer;
     private String meter;
@@ -35,6 +32,8 @@ public class GpsHelper {
 
     public static Intent getGpsBroadcastIntent() {
         Intent intent = new Intent();
+        String packageName = "com.android.settings";
+        String className = "com.android.settings.widget.SettingsAppWidgetProvider";
         intent.setClassName(packageName, className);
         intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
         return intent;
@@ -69,13 +68,12 @@ public class GpsHelper {
         return source.distanceTo(destination);
     }
 
-    public String getDistanceByTitle(float distance){
+    public String getDistanceByTitle(float distance) {
         if (distance > 1000) {
             return ((int) distance / 1000) + " " + kilometer;
         } else {
             return ((int) distance) + " " + meter;
         }
-
     }
 
 }

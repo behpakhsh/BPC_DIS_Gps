@@ -19,71 +19,70 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import bpc.dis.gps.GpsTrackerStatus;
+import bpc.dis.gps.Service.GpsTracker;
+
 public class GpsSettingHelper {
 
-    private Context context;
-    private SettingsClient mSettingsClient;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private LocationManager locationManager;
-    private int reqCode;
+    public void turnOnGps(Context context, int reqCode, GpsSettingHelperListener gpsSettingHelperListener) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (locationManager == null) {
+            return;
+        }
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            if (new GpsTracker(context).getGpsTrackerStatus() == GpsTrackerStatus.IS_FAKE_LOCATION) {
+                openSetting(context, reqCode, gpsSettingHelperListener);
+            } else {
+                if (gpsSettingHelperListener != null) {
+                    gpsSettingHelperListener.gpsStatus(true);
+                }
+            }
+        } else {
+            openSetting(context, reqCode, gpsSettingHelperListener);
+        }
+    }
 
-    public GpsSettingHelper(Context context, int reqCode) {
-        this.context = context;
-        this.reqCode = reqCode;
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        mSettingsClient = LocationServices.getSettingsClient(context);
+    public void openSetting(final Context context, final int reqCode, final GpsSettingHelperListener GpsSettingHelperListener) {
+        LocationSettingsRequest locationSettingsRequest = getLocationSettingsRequest();
+        SettingsClient settingsClient = LocationServices.getSettingsClient(context);
+        settingsClient.checkLocationSettings(locationSettingsRequest)
+                .addOnSuccessListener((Activity) context, new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        if (GpsSettingHelperListener != null) {
+                            GpsSettingHelperListener.gpsStatus(true);
+                        }
+                    }
+                })
+                .addOnFailureListener((Activity) context, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        int statusCode = ((ApiException) e).getStatusCode();
+                        switch (statusCode) {
+                            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                                try {
+                                    ResolvableApiException resolvableApiException = (ResolvableApiException) e;
+                                    resolvableApiException.startResolutionForResult((Activity) context, reqCode);
+                                } catch (IntentSender.SendIntentException ee) {
+                                    ee.printStackTrace();
+                                }
+                                break;
+                            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                                String errorMessage = "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings.";
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private LocationSettingsRequest getLocationSettingsRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(10 * 1000);
         locationRequest.setFastestInterval(2 * 1000);
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-        mLocationSettingsRequest = builder.build();
         builder.setAlwaysShow(true);
-    }
-
-    public void turnGPSOn(final onGpsListener onGpsListener) {
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            if (onGpsListener != null) {
-                onGpsListener.gpsStatus(true);
-            }
-        } else {
-            mSettingsClient
-                    .checkLocationSettings(mLocationSettingsRequest)
-                    .addOnSuccessListener((Activity) context, new OnSuccessListener<LocationSettingsResponse>() {
-                        @Override
-                        public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                            if (onGpsListener != null) {
-                                onGpsListener.gpsStatus(true);
-                            }
-                        }
-                    })
-                    .addOnFailureListener((Activity) context, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            if (onGpsListener != null) {
-                                onGpsListener.gpsStatus(false);
-                            }
-                            int statusCode = ((ApiException) e).getStatusCode();
-                            switch (statusCode) {
-                                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                                    try {
-                                        ResolvableApiException rae = (ResolvableApiException) e;
-                                        rae.startResolutionForResult((Activity) context, reqCode);
-                                    } catch (IntentSender.SendIntentException ee) {
-                                        ee.printStackTrace();
-                                    }
-                                    break;
-                                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                                    String errorMessage = "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings.";
-                                    Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-        }
-    }
-
-    public interface onGpsListener {
-        void gpsStatus(boolean isGPSEnable);
+        return builder.build();
     }
 
 }

@@ -57,6 +57,9 @@ public class GpsSettingHelper {
                 .addOnFailureListener((Activity) context, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        if (GpsSettingHelperListener != null) {
+                            GpsSettingHelperListener.gpsStatus(false);
+                        }
                         int statusCode = ((ApiException) e).getStatusCode();
                         switch (statusCode) {
                             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:

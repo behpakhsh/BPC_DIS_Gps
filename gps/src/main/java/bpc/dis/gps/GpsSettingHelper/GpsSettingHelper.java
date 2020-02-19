@@ -42,7 +42,7 @@ public class GpsSettingHelper {
         }
     }
 
-    public void openSetting(final Context context, final int reqCode, final GpsSettingHelperListener GpsSettingHelperListener) {
+    private void openSetting(final Context context, final int reqCode, final GpsSettingHelperListener GpsSettingHelperListener) {
         LocationSettingsRequest locationSettingsRequest = getLocationSettingsRequest();
         SettingsClient settingsClient = LocationServices.getSettingsClient(context);
         settingsClient.checkLocationSettings(locationSettingsRequest)
@@ -57,9 +57,6 @@ public class GpsSettingHelper {
                 .addOnFailureListener((Activity) context, new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        if (GpsSettingHelperListener != null) {
-                            GpsSettingHelperListener.gpsStatus(false);
-                        }
                         int statusCode = ((ApiException) e).getStatusCode();
                         switch (statusCode) {
                             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:

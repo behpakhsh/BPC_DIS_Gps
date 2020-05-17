@@ -34,15 +34,23 @@ public class RoutingNavigationHelper {
         }
     }
 
+    @Deprecated
     public void startGeoNavigation(Context context, Location source, Location destination) {
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                 Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude()));
         context.startActivity(intent);
     }
 
+    @Deprecated
     public void startGeoNavigation(Context context, Location source, Location destination, String name) {
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
                 Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude() + " (" + name + ")"));
+        context.startActivity(intent);
+    }
+
+    public void startGeoNavigation(Context context, Location destination, String name) {
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("geo:" + 0 + "," + 0 + "?q=" + destination.getLatitude() + "," + destination.getLongitude() + " (" + name + ")"));
         context.startActivity(intent);
     }
 

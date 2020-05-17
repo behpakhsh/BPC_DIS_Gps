@@ -40,4 +40,10 @@ public class RoutingNavigationHelper {
         context.startActivity(intent);
     }
 
+    public void startGeoNavigation(Context context, Location source, Location destination, String name) {
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("geo:" + source.getLatitude() + "," + source.getLongitude() + "?q=" + destination.getLatitude() + "," + destination.getLongitude() + " (" + name + ")"));
+        context.startActivity(intent);
+    }
+
 }

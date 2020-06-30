@@ -13,6 +13,8 @@ import android.os.IBinder;
 
 import androidx.core.app.ActivityCompat;
 
+import java.util.List;
+
 import bpc.dis.gps.GpsTrackerStatus;
 import bpc.dis.gps.MockLocationChecker;
 
@@ -55,7 +57,6 @@ public class GpsTracker extends Service implements android.location.LocationList
     }
 
     public void initLocation(Context context) {
-
         LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         if (locationManager == null) {
             gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
@@ -89,6 +90,14 @@ public class GpsTracker extends Service implements android.location.LocationList
         }
 
         if (location == null) {
+            List<String> providers = locationManager.getAllProviders();
+            if (providers != null && !providers.isEmpty()) {
+                for (String provider : providers) {
+                    location = locationManager.getLastKnownLocation(provider);
+                }
+            }
+        }
+        if (location == null) {
             gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
         } else if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
             if (MockLocationChecker.isMockSettingsOn(context)) {
@@ -99,8 +108,6 @@ public class GpsTracker extends Service implements android.location.LocationList
                 }
             }
         }
-
-
     }
 
     public double getLatitude() {

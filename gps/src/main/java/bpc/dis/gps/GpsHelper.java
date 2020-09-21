@@ -44,6 +44,11 @@ public class GpsHelper {
         return locationProviders != null && !locationProviders.equals("");
     }
 
+    public static boolean gpsIsOnInFragment(Context context) {
+        String locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        return locationProviders != null && !locationProviders.equals("");
+    }
+
     public String getDistanceBetweenLocationWithUnit(Location source, Location destination) {
         if (source == null || destination == null) {
             return unknown;

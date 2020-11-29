@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -92,6 +93,66 @@ public class GpsTracker extends Service implements android.location.LocationList
         if (location == null) {
             List<String> providers = locationManager.getAllProviders();
             if (providers != null && !providers.isEmpty()) {
+                for (String provider : providers) {
+                    location = locationManager.getLastKnownLocation(provider);
+                }
+            }
+        }
+        if (location == null) {
+            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
+        } else if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
+            if (MockLocationChecker.isMockSettingsOn(context)) {
+                gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                if (location.isFromMockProvider()) {
+                    gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
+                }
+            }
+        }
+    }
+
+    public void initLocationAccurate(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        if (locationManager == null) {
+            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
+            return;
+        }
+
+        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            gpsTrackerStatus = GpsTrackerStatus.ACCESSS_DENY;
+            location = new Location("");
+            return;
+        }
+
+        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            gpsTrackerStatus = GpsTrackerStatus.GPS_IS_OFF;
+            location = new Location("");
+            return;
+        }
+
+        String bestProvider;
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        bestProvider = locationManager.getBestProvider(criteria, true);
+
+        if (isGpsEnabled) {
+            if (bestProvider == null) {
+                bestProvider = LocationManager.GPS_PROVIDER;
+            }
+            locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
+            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
+        }
+
+        if (isNetworkEnabled) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
+        }
+
+        if (location == null) {
+            List<String> providers = locationManager.getAllProviders();
+            if (!providers.isEmpty()) {
                 for (String provider : providers) {
                     location = locationManager.getLastKnownLocation(provider);
                 }

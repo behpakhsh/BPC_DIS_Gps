@@ -7,49 +7,55 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
 import androidx.core.app.ActivityCompat;
 
-import java.util.List;
-
 import bpc.dis.gps.GpsTrackerStatus;
-import bpc.dis.gps.MockLocationChecker;
 
 public class GpsTracker extends Service implements android.location.LocationListener {
 
-    private GpsTrackerStatus gpsTrackerStatus;
     private Location location;
+    private android.location.LocationListener locationListener;
 
     public GpsTracker() {
 
     }
 
-    public GpsTracker(Context context) {
-        initLocation(context);
+    public GpsTracker(LocationListener locationListener) {
+        this.locationListener = locationListener;
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        if (locationListener != null) {
+            locationListener.onLocationChanged(location);
+        }
         this.location = location;
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        if (locationListener != null) {
+            locationListener.onProviderDisabled(provider);
+        }
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        if (locationListener != null) {
+            locationListener.onProviderEnabled(provider);
+        }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        if (locationListener != null) {
+            locationListener.onProviderDisabled(provider);
+        }
     }
 
     @Override
@@ -57,140 +63,59 @@ public class GpsTracker extends Service implements android.location.LocationList
         return null;
     }
 
-    public void initLocation(Context context) {
-        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-        if (locationManager == null) {
-            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
-            return;
-        }
-
-        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            gpsTrackerStatus = GpsTrackerStatus.ACCESSS_DENY;
-            location = new Location("");
-            return;
-        }
-
-        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (!isGpsEnabled && !isNetworkEnabled) {
-            gpsTrackerStatus = GpsTrackerStatus.GPS_IS_OFF;
-            location = new Location("");
-            return;
-        }
-
-
-        if (isNetworkEnabled) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
-        }
-        if (isGpsEnabled) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
-        }
-
-        if (location == null) {
-            List<String> providers = locationManager.getAllProviders();
-            if (providers != null && !providers.isEmpty()) {
-                for (String provider : providers) {
-                    location = locationManager.getLastKnownLocation(provider);
-                }
-            }
-        }
-        if (location == null) {
-            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
-        } else if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
-            if (MockLocationChecker.isMockSettingsOn(context)) {
-                gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                if (location.isFromMockProvider()) {
-                    gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
-                }
-            }
-        }
-    }
-
     public void initLocationAccurate(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+
         if (locationManager == null) {
-            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
+            return;
+        }
+        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
+                (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
             return;
         }
 
-        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-            gpsTrackerStatus = GpsTrackerStatus.ACCESSS_DENY;
-            location = new Location("");
-            return;
-        }
-
-        boolean isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (!isGpsEnabled && !isNetworkEnabled) {
-            gpsTrackerStatus = GpsTrackerStatus.GPS_IS_OFF;
-            location = new Location("");
-            return;
-        }
-
-        String bestProvider;
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        bestProvider = locationManager.getBestProvider(criteria, true);
-
-        if (isGpsEnabled) {
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Criteria criteria = new Criteria();
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
+            String bestProvider = locationManager.getBestProvider(criteria, true);
             if (bestProvider == null) {
                 bestProvider = LocationManager.GPS_PROVIDER;
             }
-            locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
-            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
+            locationManager.requestLocationUpdates(
+                    bestProvider,
+                    30000,
+                    0,
+                    this
+            );
+        } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    30000,
+                    0,
+                    this
+            );
         }
 
-        if (isNetworkEnabled) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            gpsTrackerStatus = GpsTrackerStatus.TRACKED;
-        }
-
-        if (location == null) {
-            List<String> providers = locationManager.getAllProviders();
-            if (!providers.isEmpty()) {
-                for (String provider : providers) {
-                    location = locationManager.getLastKnownLocation(provider);
-                }
-            }
-        }
-        if (location == null) {
-            gpsTrackerStatus = GpsTrackerStatus.UNHANDLED;
-        } else if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
-            if (MockLocationChecker.isMockSettingsOn(context)) {
-                gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                if (location.isFromMockProvider()) {
-                    gpsTrackerStatus = GpsTrackerStatus.IS_FAKE_LOCATION;
-                }
-            }
-        }
-    }
-
-    public double getLatitude() {
-        if (location == null) {
-            return 0;
-        }
-        return location.getLatitude();
-    }
-
-    public double getLongitude() {
-        if (location == null) {
-            return 0;
-        }
-        return location.getLongitude();
     }
 
     public Location getLocation() {
         return location;
     }
 
-    public GpsTrackerStatus getGpsTrackerStatus() {
-        return gpsTrackerStatus;
+    public GpsTrackerStatus getGpsTrackerStatus(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        if (locationManager == null) {
+            return GpsTrackerStatus.UNHANDLED;
+        }
+        if ((ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) &&
+                (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            return GpsTrackerStatus.ACCESSS_DENY;
+        }
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            return GpsTrackerStatus.TRACKED;
+        }
+        return GpsTrackerStatus.GPS_IS_OFF;
     }
 
 }

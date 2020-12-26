@@ -25,10 +25,6 @@ public class GpsTrackerMain extends Service implements LocationListener {
 
     }
 
-    public GpsTrackerMain(LocationListener locationListener) {
-        this.locationListener = locationListener;
-    }
-
     @Override
     public void onLocationChanged(Location location) {
         if (locationListener != null) {
@@ -54,7 +50,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         if (locationListener != null) {
-            locationListener.onProviderDisabled(provider);
+            locationListener.onStatusChanged(provider, status, extras);
         }
     }
 
@@ -116,6 +112,14 @@ public class GpsTrackerMain extends Service implements LocationListener {
             return GpsTrackerStatus.TRACKED;
         }
         return GpsTrackerStatus.GPS_IS_OFF;
+    }
+
+    public LocationListener getLocationListener() {
+        return locationListener;
+    }
+
+    public void setLocationListener(LocationListener locationListener) {
+        this.locationListener = locationListener;
     }
 
 }

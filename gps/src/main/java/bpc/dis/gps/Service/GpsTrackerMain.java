@@ -27,10 +27,10 @@ public class GpsTrackerMain extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
+        this.location = location;
         if (locationListener != null) {
             locationListener.onLocationChanged(location);
         }
-        this.location = location;
     }
 
     @Override

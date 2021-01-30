@@ -106,7 +106,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
-                    30000,
+                    60000,
                     0,
                     this
             );
@@ -121,7 +121,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
             }
             locationManager.requestLocationUpdates(
                     bestProvider,
-                    30000,
+                    60000,
                     0,
                     this
             );

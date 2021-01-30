@@ -40,12 +40,14 @@ public class GpsHelper {
     }
 
     public static boolean gpsIsOn(Activity activity) {
-        String locationProviders = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        String locationProviders = Settings.Secure.
+                getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
         return locationProviders != null && !locationProviders.equals("");
     }
 
     public static boolean gpsIsOnInFragment(Context context) {
-        String locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        String locationProviders = Settings.Secure.
+                getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
         return locationProviders != null && !locationProviders.equals("");
     }
 
@@ -54,7 +56,8 @@ public class GpsHelper {
             return unknown;
         }
 
-        if ((source.getLatitude() == 0 && source.getLongitude() == 0) || (destination.getLatitude() == 0 && destination.getLongitude() == 0)) {
+        if ((source.getLatitude() == 0 && source.getLongitude() == 0) ||
+                (destination.getLatitude() == 0 && destination.getLongitude() == 0)) {
             return unknown;
         }
 
@@ -67,7 +70,8 @@ public class GpsHelper {
             return 0;
         }
 
-        if ((source.getLatitude() == 0 && source.getLongitude() == 0) || (destination.getLatitude() == 0 && destination.getLongitude() == 0)) {
+        if ((source.getLatitude() == 0 && source.getLongitude() == 0) ||
+                (destination.getLatitude() == 0 && destination.getLongitude() == 0)) {
             return 0;
         }
         return source.distanceTo(destination);

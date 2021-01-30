@@ -1,6 +1,7 @@
 package bpc.dis.gps.Service;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import java.util.List;
 import bpc.dis.gps.GpsTrackerStatus;
 import bpc.dis.gps.MockLocationChecker;
 
+@SuppressLint("MissingPermission")
 public class GpsTracker extends Service implements android.location.LocationListener {
 
     private GpsTrackerStatus gpsTrackerStatus;
@@ -92,7 +94,7 @@ public class GpsTracker extends Service implements android.location.LocationList
 
         if (location == null) {
             List<String> providers = locationManager.getAllProviders();
-            if (providers != null && !providers.isEmpty()) {
+            if (!providers.isEmpty()) {
                 for (String provider : providers) {
                     location = locationManager.getLastKnownLocation(provider);
                 }

@@ -1,6 +1,7 @@
 package bpc.dis.gps.Service;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import androidx.core.app.ActivityCompat;
 import bpc.dis.gps.GpsTrackerStatus;
 import bpc.dis.gps.MockLocationChecker;
 
+@SuppressLint("MissingPermission")
 public class LiveGpsTracker extends Service implements LocationListener {
 
     private GpsTrackerStatus gpsTrackerStatus;

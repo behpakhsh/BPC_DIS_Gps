@@ -33,24 +33,34 @@ public class GpsTrackerMain extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         if (location == null) {
-            LocationManager locationManager =
-                    (LocationManager) getSystemService(LOCATION_SERVICE);
-            if (locationManager != null) {
-                List<String> providers = locationManager.getAllProviders();
-                if (!providers.isEmpty()) {
-                    for (String provider : providers) {
-                        location = locationManager.getLastKnownLocation(provider);
-                        if (location != null && location.getLatitude() != 0 && location.getLongitude() != 0) {
-                            break;
-                        }
-                    }
-                }
+            location = getLastKnowLocation();
+        } else {
+            if (location.getLatitude() == 0 || location.getLongitude() == 0) {
+                location = getLastKnowLocation();
             }
         }
         this.location = location;
         if (locationListener != null) {
             locationListener.onLocationChanged(location);
         }
+    }
+
+    private Location getLastKnowLocation() {
+        Location location = new Location("");
+        LocationManager locationManager =
+                (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (locationManager != null) {
+            List<String> providers = locationManager.getAllProviders();
+            if (!providers.isEmpty()) {
+                for (String provider : providers) {
+                    location = locationManager.getLastKnownLocation(provider);
+                    if (location != null && location.getLatitude() != 0 && location.getLongitude() != 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return location;
     }
 
     @Override

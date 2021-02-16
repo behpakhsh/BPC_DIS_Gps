@@ -32,17 +32,59 @@ public class GpsTrackerMain extends Service implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location == null) {
-            location = getLastKnowLocation();
-        } else {
-            if (location.getLatitude() == 0 || location.getLongitude() == 0) {
+        try {
+            if (location == null) {
                 location = getLastKnowLocation();
+            } else {
+                if (location.getLatitude() == 0 || location.getLongitude() == 0) {
+                    location = getLastKnowLocation();
+                }
             }
+            this.location = location;
+            if (locationListener != null) {
+                locationListener.onLocationChanged(location);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        this.location = location;
-        if (locationListener != null) {
-            locationListener.onLocationChanged(location);
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        try {
+            if (locationListener != null) {
+                locationListener.onProviderDisabled(provider);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        try {
+            if (locationListener != null) {
+                locationListener.onProviderEnabled(provider);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        try {
+            if (locationListener != null) {
+                locationListener.onStatusChanged(provider, status, extras);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent arg0) {
+        return null;
     }
 
     private Location getLastKnowLocation() {
@@ -63,32 +105,6 @@ public class GpsTrackerMain extends Service implements LocationListener {
         return location;
     }
 
-    @Override
-    public void onProviderDisabled(String provider) {
-        if (locationListener != null) {
-            locationListener.onProviderDisabled(provider);
-        }
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        if (locationListener != null) {
-            locationListener.onProviderEnabled(provider);
-        }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        if (locationListener != null) {
-            locationListener.onStatusChanged(provider, status, extras);
-        }
-    }
-
-    @Override
-    public IBinder onBind(Intent arg0) {
-        return null;
-    }
-
     public void initLocationAccurate(Context context) {
         LocationManager locationManager =
                 (LocationManager) context.getSystemService(LOCATION_SERVICE);
@@ -102,8 +118,8 @@ public class GpsTrackerMain extends Service implements LocationListener {
                         PackageManager.PERMISSION_GRANTED)) {
             return;
         }
-
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     60000,
@@ -119,6 +135,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
             if (bestProvider == null) {
                 bestProvider = LocationManager.GPS_PROVIDER;
             }
+            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             locationManager.requestLocationUpdates(
                     bestProvider,
                     60000,
@@ -152,8 +169,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
             return GpsTrackerStatus.GPS_IS_OFF;
         }
 
-        if (MockLocationChecker.thereIsAnyMockLocationApp(context) &&
-                MockLocationChecker.isMockSettingsOn(context)) {
+        if (MockLocationChecker.thereIsAnyMockLocationApp(context)) {
             return GpsTrackerStatus.IS_FAKE_LOCATION;
         }
 

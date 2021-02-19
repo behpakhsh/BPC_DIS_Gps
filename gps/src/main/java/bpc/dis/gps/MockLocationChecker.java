@@ -4,22 +4,13 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.provider.Settings;
 
 import java.util.List;
 
 public class MockLocationChecker {
 
-    public static boolean isMockSettingsOn(Context context, Location location) {
-        boolean isMock = false;
-        if (android.os.Build.VERSION.SDK_INT >= 18) {
-            isMock = location.isFromMockProvider();
-        } else {
-            isMock = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION).equals("0");
-        }
-
-        android.os.Build.VERSION.SDK_INT
+    public static boolean isMockSettingsOn(Context context) {
         return !Settings.Secure
                 .getString(context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION)
                 .equals("0");

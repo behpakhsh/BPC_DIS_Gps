@@ -119,7 +119,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
             return;
         }
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
+//            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     60000,
@@ -135,7 +135,7 @@ public class GpsTrackerMain extends Service implements LocationListener {
             if (bestProvider == null) {
                 bestProvider = LocationManager.GPS_PROVIDER;
             }
-            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
+//            locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             locationManager.requestLocationUpdates(
                     bestProvider,
                     60000,

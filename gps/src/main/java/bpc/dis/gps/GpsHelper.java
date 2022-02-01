@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.provider.Settings;
 
 public class GpsHelper {
@@ -40,15 +41,31 @@ public class GpsHelper {
     }
 
     public static boolean gpsIsOn(Activity activity) {
-        String locationProviders = Settings.Secure.
-                getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        return locationProviders != null && !locationProviders.equals("");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            String gpsStatus = android.provider.Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_MODE);
+            if (gpsStatus != null) {
+                return false;
+            }
+            return !gpsStatus.equals("0");
+        } else {
+            String locationProviders = Settings.Secure.
+                    getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return locationProviders != null && !locationProviders.equals("");
+        }
     }
 
     public static boolean gpsIsOnInFragment(Context context) {
-        String locationProviders = Settings.Secure.
-                getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        return locationProviders != null && !locationProviders.equals("");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            String gpsStatus = android.provider.Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+            if (gpsStatus != null) {
+                return false;
+            }
+            return !gpsStatus.equals("0");
+        } else {
+            String locationProviders = Settings.Secure.
+                    getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return locationProviders != null && !locationProviders.equals("");
+        }
     }
 
     public String getDistanceBetweenLocationWithUnit(Location source, Location destination) {

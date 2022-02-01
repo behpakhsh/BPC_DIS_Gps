@@ -43,10 +43,9 @@ public class GpsHelper {
     public static boolean gpsIsOn(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             String gpsStatus = android.provider.Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_MODE);
-            if (gpsStatus != null) {
+            if (gpsStatus == null) {
                 return false;
-            }
-            return !gpsStatus.equals("0");
+            } else return !gpsStatus.equals("0");
         } else {
             String locationProviders = Settings.Secure.
                     getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -57,10 +56,9 @@ public class GpsHelper {
     public static boolean gpsIsOnInFragment(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             String gpsStatus = android.provider.Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-            if (gpsStatus != null) {
+            if (gpsStatus == null) {
                 return false;
-            }
-            return !gpsStatus.equals("0");
+            } else return !gpsStatus.equals("0");
         } else {
             String locationProviders = Settings.Secure.
                     getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
